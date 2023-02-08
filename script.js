@@ -1,17 +1,17 @@
 const arguments = process.argv
 const { Sequelize, DataTypes } = require("sequelize")
-const sequelize = new Sequelize("mysql://PASSWORD:USERNAME@localhost:3306/rishabh")
+const sequelize = new Sequelize("mysql://USERNAME:PASSWORD@localhost:3306/training")
 const fs = require("fs")
 
 const readFile = async (val) => {
     try {
         var oldPath = val
-        var newPath = './upload/myself.jpg'
-
+        var newPath = './upload/pic.jpg'
+        
         fs.copyFile(oldPath, newPath, function (err) {
             if (err) throw err
             else {
-                uploadToDb(Buffer.from(fs.readFileSync(newPath)));
+                uploadToDb(Buffer.from(fs.readFileSync(newPath)),val);
             }
         })
     } catch (error) {
@@ -19,20 +19,36 @@ const readFile = async (val) => {
     }
 }
 
-const uploadToDb = async (file) => {
+const uploadToDb = async (file,oldPath) => {
     try {
-        const File = sequelize.define("File", {
-            file: {
+        var newPath = './upload/pic.jpg'
+        const file_store = sequelize.define("file_store", {
+            file_name:{
+                type:DataTypes.STRING,
+            },
+            file_object: {
                 type: DataTypes.BLOB
+            },
+            upload_date_time:{
+                type: 'TIMESTAMP',
+                defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+                allowNull: false
+            },
+            source:{
+                type:DataTypes.STRING
             }
+        },{ 
+            timestamps: true
+    })
+        file_store.sync({alter:true});
+        await file_store.create({
+            file_name:newPath.substring(9),
+            file_object:file,
+            source:oldPath
         })
-        File.sync();
-        const upload = await File.create({
-            file
-        })
-        console.log("File Uploaded Sucessfully !!!")
+        console.log("Successfully uploaded")
     } catch (error) {
-        console.log("Mysql Upload  Error : ", error)
+        console.log("'Error occurred:", error)
     }
 }
 
