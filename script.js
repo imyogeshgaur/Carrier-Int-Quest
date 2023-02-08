@@ -12,7 +12,7 @@ const connection = mysql2.createConnection({
 const readFile = async (val) => {
     try {
         var oldPath = val
-        var newPath = './upload/myself.jpg'
+        var newPath = './upload/abc.txt'
 
         fs.copyFile(oldPath, newPath, function (err) {
             if (err) throw err
