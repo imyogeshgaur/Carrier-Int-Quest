@@ -4,9 +4,9 @@ const mysql2 = require('mysql2');
 
 const connection = mysql2.createConnection({
     host: 'localhost',
-    user: 'root',
-    password: 'root',
-    database: 'carrier'
+    user: 'USERNAME',
+    password: 'PASSWORD',
+    database: 'DATABASE_NAME'
 });
 
 const readFile = async (val) => {
