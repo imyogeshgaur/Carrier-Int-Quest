@@ -2,9 +2,9 @@ const mysql2 = require("mysql2");
 
 const connection = mysql2.createConnection({
     host: "localhost",
-    user: "root",
-    password: "root",
-    database: "carrier",
+    user: "USERNAME",
+    password: "PASSWORD",
+    database: "DATABASE",
 });
 
 const uploadToDb = (file_object,source,file_name)=>{
