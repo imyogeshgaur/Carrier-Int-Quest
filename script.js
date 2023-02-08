@@ -1,17 +1,23 @@
 const arguments = process.argv
-const { Sequelize, DataTypes } = require("sequelize")
-const sequelize = new Sequelize("mysql://USERNAME:PASSWORD@localhost:3306/training")
 const fs = require("fs")
+const mysql2 = require('mysql2');
+
+const connection = mysql2.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: 'root',
+    database: 'carrier'
+});
 
 const readFile = async (val) => {
     try {
         var oldPath = val
-        var newPath = './upload/pic.jpg'
-        
+        var newPath = './upload/myself.jpg'
+
         fs.copyFile(oldPath, newPath, function (err) {
             if (err) throw err
             else {
-                uploadToDb(Buffer.from(fs.readFileSync(newPath)),val);
+                uploadToDb(Buffer.from(fs.readFileSync(newPath)), oldPath, newPath);
             }
         })
     } catch (error) {
@@ -19,36 +25,41 @@ const readFile = async (val) => {
     }
 }
 
-const uploadToDb = async (file,oldPath) => {
+const uploadToDb = async (file_object, source, file_name) => {
     try {
-        var newPath = './upload/pic.jpg'
-        const file_store = sequelize.define("file_store", {
-            file_name:{
-                type:DataTypes.STRING,
-            },
-            file_object: {
-                type: DataTypes.BLOB
-            },
-            upload_date_time:{
-                type: 'TIMESTAMP',
-                defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
-                allowNull: false
-            },
-            source:{
-                type:DataTypes.STRING
+        //Create table 
+
+        const createTable = `create table file_store(file_name varchar(255), file_object blob, upload_date_time datetime,source varchar(255));`
+
+        connection.query(createTable, (err, result) => {
+            if (err) {
+                console.error("Table Creation Error : ", err);
+            } else {
+                console.log(`Table Created Successfully !!!`);
             }
-        },{ 
-            timestamps: true
-    })
-        file_store.sync({alter:true});
-        await file_store.create({
-            file_name:newPath.substring(9),
-            file_object:file,
-            source:oldPath
-        })
-        console.log("Successfully uploaded")
+        });
+
+        //Insert Data To Table 
+        const insertTable = `INSERT INTO file_store (file_name, file_object, upload_date_time, source) 
+        VALUES (?, ?, ?, ?)`;
+        
+        const values = [
+            file_name.substring(9),
+            file_object,
+            new Date(),
+            source
+        ];
+
+        connection.query(insertTable, values, (err, result) => {
+            if (err) {
+                console.error("File Insert Error : ", err);
+                return
+            } else {
+                console.log(`File "${file_name.substring(9)}" has been uploaded successfully.`);
+            }
+        });
     } catch (error) {
-        console.log("'Error occurred:", error)
+        console.log("Mysql Upload  Error : ", error)
     }
 }
 
