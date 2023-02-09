@@ -4,14 +4,11 @@ const mysql2 = require("mysql2");
 const express = require("express");
 const upload = require("./middleware/upload");
 const fs = require('fs');
-const cors = require('cors');
 const app = express();
 
 app.use(urlencoded({ extended: true }));
 app.use(json());
-app.use(cors({
-    origin: "http://localhost:5173"
-}))
+res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
 
 const connection = mysql2.createConnection({
     host: "localhost",
