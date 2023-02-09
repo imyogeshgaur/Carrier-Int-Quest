@@ -1,5 +1,5 @@
 const arguments = process.argv;
-const { urlencoded, json } = require("express");
+const { urlencoded, json, response } = require("express");
 const mysql2 = require("mysql2");
 const express = require("express");
 const upload = require("./middleware/upload");
@@ -8,7 +8,6 @@ const app = express();
 
 app.use(urlencoded({ extended: true }));
 app.use(json());
-res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
 
 const connection = mysql2.createConnection({
     host: "localhost",
@@ -19,8 +18,10 @@ const connection = mysql2.createConnection({
 
 app.post("/upload", upload, async (req, res) => {
     try {
-        // Create Table
-
+        // Handle Cors
+        res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+        
+        //Create Table
         const createTable = `create table file_store(file_name varchar(255), file_object blob, upload_date_time datetime,source varchar(255));`;
 
         connection.query(createTable, (err, result) => {
